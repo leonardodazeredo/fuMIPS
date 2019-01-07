@@ -1,0 +1,35 @@
+.data
+
+int:	45,4
+vet: 	.asciiz "BxCcFCcbbBfAXbZaCrca"
+
+.text
+
+	la $a3,vet
+
+	addi $a0,$a0,10		#teste
+		
+	jal SUM			#teste
+		
+	j FIM
+		
+SUM:	addi $sp,$sp,-8		#teste
+	sw $a0,0($sp)
+	sw $ra,4($sp)
+		
+	bne $zero,$a0,ELSE
+		
+	andi $v0,$v0,0
+	addi $sp,$sp,8
+		
+	jr $ra
+		
+ELSE:	addi $a0,$a0,-1
+	jal SUM
+	lw $ra,4($sp)
+	lw $a0,0($sp)
+	addi $sp,$sp,8
+	add $v0,$v0,$a0
+	jr $ra
+		
+FIM:

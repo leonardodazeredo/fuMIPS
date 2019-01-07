@@ -1,0 +1,88 @@
+	.data 
+vet:	.asciiz "BxCcFCcbbBfAXbZaCrc"
+
+	.text
+	
+	la $a0,vet			# $a0 = vet
+
+	
+	addi $a1,$zero,19		# $a1 = tamanho
+
+	jal ORDENA
+
+	j EXIT1
+	
+ORDENA:	addi $sp,$sp,-4
+	sw $ra,0($sp)
+
+	addi $t7,$a1,-1			# $t7 = tamanho - 1
+	addi $t0,$zero,0		# $t0 = i
+	
+	addi $t5,$zero,90		# $t5 (temp) = 'Z' 
+	
+LOOP1:	slt $t6,$t0,$t7			# $t6 (temp) = 1 if $t0 (i) < $t7 (tamanho - 1)
+	beq $t6,$zero,EXIT1		# jump EXIT1 if $t0 (i) >= $t7 (tamanho - 1)
+	
+	add $t1,$zero,$t0		# $t1 (j) = $t0 (i)
+	
+LOOP2:	slt $t6,$t1,$a1			# $t6 (temp) = 1 if $t1 (j) < $a1 (tamanho)
+	beq $t6,$zero,EXIT2		# jump EXIT2 if $t1 (j) >= $a1 (tamanho)
+	
+	add $t6,$t0,$zero		# $t6 (temp) = $t0 (i) * 4 --Editado--
+	add $a2,$a0,$t6			# $a2 (&vet[i]) = $a0 (vet) + $t6 (temp)
+	lb $v0,0($a2)			# $v0 (vet[i]) = *[&vet[i]]
+	
+	slt $t6,$v0,$t5			# $t6 (temp) = 1 if $v0 (vet[i]) < $t5 (temp='Z')
+	bne $t6,$zero,ENTRAR1		# jump ENTRAR1 if $v0 (vet[i]) < $t5 (temp='Z')
+	beq $v0,$t5,ENTRAR1		# jump ENTRAR1 if $v0 (vet[i]) = $t5 (temp='Z')
+	j ELSE1				# jump ELSE1 if $v0 (vet[i]) > $t5 (temp='Z')
+	
+ENTRAR1:addi $t8,$v0,-65		# t8 (letraTemp1) = $v0 (vet[i]) - 65 ('A')
+	j EXITIF1
+	
+ELSE1:	addi $t8,$v0,-97		# t8 (letraTemp1) = $v0 (vet[i]) - 97 ('a')
+
+EXITIF1:add $t6,$t1,$zero		# $t6 (temp) = $t1 (j) * 4 --Editado--
+	add $a3,$a0,$t6			# $a3 ($vet[j]) = $a0 (vet) + $t6 (temp)
+	lb $v1,0($a3)			# $v1 (vet[j]) = *[&vet[j]]
+
+	slt $t6,$v1,$t5			# $t6 (temp) = 1 if $v1 (vet[j]) < $t5 (temp='Z')
+	bne $t6,$zero,ENTRAR2		# jump ENTRAR2 if $v1 (vet[j]) < $t5 (temp='Z')
+	beq $v1,$t5,ENTRAR2		# jump ENTRAR2 if $v1 (vet[j]) = $t5 (temp='Z')
+	j ELSE2				# jump ELSE2 if $v1 (vet[j]) > $t5 (temp='Z')
+	
+ENTRAR2:addi $t9,$v1,-65		# t9 (letraTemp2) = $v1 (vet[j]) - 65 ('A')
+	j EXITIF2
+	
+ELSE2:	addi $t9,$v1,-97		# t9 (letraTemp2) = $v1 (vet[j]) - 97 ('a')
+	
+EXITIF2:slt $t6,$t8,$t9			# $t6 (temp) = 1 if $t8 (letraTemp1) < $t9 (letraTemp2)
+	bne $t6,$zero,ELSE3		# jump ELSE3 if $t8 (letraTemp1) < $t9 (letraTemp2)
+	
+	bne $t8,$t9,ENTRAR3		# jump ENTRAR if $t8 (letraTemp1) <> $t9 (letraTemp2)
+	
+	slt $t6,$v0,$v1			# $t6 (temp) = 1 if $v0 (vet[i]) < $v1 (vet[j])
+	beq $t6,$zero,ELSE3		# jump ELSE3 if $v0 (vet[i]) >= $v1 (vet[j])
+	
+ENTRAR3:jal TROCA
+
+	lw $ra,0($sp)
+	addi $sp,$sp,4
+	
+ELSE3: 	addi $t1,$t1,1			# $t1 (j) ++
+	j LOOP2
+	
+EXIT2:	addi $t0,$t0,1			# $t0 (i) ++
+	j LOOP1
+
+TROCA:
+	addi $sp,$sp,-4
+	sw $ra,0($sp)
+
+	lb $v1,0($a3)
+	lb $v0,0($a2)
+	sb $v0,0($a3)
+	sb $v1,0($a2)
+	jr $ra
+
+EXIT1:
